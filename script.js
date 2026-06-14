@@ -52,6 +52,7 @@ const HERO_TAGS = [
     {text:'JavaScript',colorName:'yellow',bottom:'22%',left:'15%',delay:.8}, {text:'AI Ethics',colorName:'purple',top:'40%',left:'3%',delay:1.2},
 ];
 
+const state = { name: '', xp: 0, level: 1, streak: 0, lastVisit: null, pathsVisited: new Set(), lessonsRead: new Set(), quizzesPassed: new Set(), perfectQuizzes: 0, chatCount: 0, bookmarks: new Set(), timerSessions: 0, certificates: 0, pathsCompleted: 0, unlockedAchievements: new Set(), quizResults: {}, nameSet: false, chatHistory: [] };
 const COMPANION_MSGS = ["Scroll down — there's so much to explore!","Every expert was once a beginner. Keep going!","Try clicking on a learning path that excites you.","Your potential is limitless. Seriously.","Click me to chat! I'm always here for you.","Consistency beats intensity. Small steps, big results.","Try the Study Timer for focused learning sessions!","Check out the Knowledge Map — it's mesmerizing."];
 
 const state = { name: '', xp: 0, level: 1, streak: 0, lastVisit: null, pathsVisited: new Set(), lessonsRead: new Set(), quizzesPassed: new Set(), perfectQuizzes: 0, chatCount: 0, bookmarks: new Set(), timerSessions: 0, certificates: 0, pathsCompleted: 0, unlockedAchievements: new Set(), quizResults: {}, nameSet: false };
@@ -143,14 +144,121 @@ document.getElementById('voiceToggle').addEventListener('click',()=>{ voiceEnabl
 document.getElementById('chatSend').addEventListener('click',sendChatMsg);
 document.getElementById('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendChatMsg()});
 
-function addChatMsg(sender,text){ const c=document.getElementById('chatMessages'),m=document.createElement('div'); m.className=`chat-msg ${sender} flex gap-2 ${sender==='user'?'justify-end':''}`; if(sender==='ai')m.innerHTML=`<div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 orb-gradient"><i class="fas fa-robot text-deep text-xs"></i></div><div class="glass px-3 py-2 rounded-xl rounded-tl-none text-sm max-w-[260px]">${text}</div>`; else m.innerHTML=`<div class="bg-primary/20 px-3 py-2 rounded-xl rounded-tr-none text-sm max-w-[260px]">${text}</div>`; c.appendChild(m);c.scrollTop=c.scrollHeight; }
+function addChatMsg(sender, text, isHtml=false){ 
+    const c=document.getElementById('chatMessages'),m=document.createElement('div'); 
+    m.className=`chat-msg ${sender} flex gap-2 ${sender==='user'?'justify-end':''}`; 
+    
+    // Increased max-width for AI messages to fit code blocks better
+    const bubbleWidth = sender === 'ai' ? 'max-w-[340px]' : 'max-w-[260px]';
+    
+    if(sender==='ai') {
+        m.innerHTML=`<div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 orb-gradient"><i class="fas fa-robot text-deep text-xs"></i></div><div class="glass px-3 py-2 rounded-xl rounded-tl-none text-sm ${bubbleWidth} ai-markdown">${isHtml ? text : text}</div>`; 
+    } else {
+        m.innerHTML=`<div class="bg-primary/20 px-3 py-2 rounded-xl rounded-tr-none text-sm ${bubbleWidth}">${text}</div>`; 
+    }
+    c.appendChild(m);c.scrollTop=c.scrollHeight; 
+}
 
-function sendChatMsg(){ const inp=document.getElementById('chatInput'),text=inp.value.trim(); if(!text)return; addChatMsg('user',text);inp.value=''; state.chatCount++;checkAchievements();saveState(); const tid='t-'+Date.now(); setTimeout(()=>addTyping(tid),300); setTimeout(()=>{removeTyping(tid);const r=generateResponse(text);addChatMsg('ai',r);if(voiceEnabled)speak(r)},1000+Math.random()*800); }
+async function sendChatMsg(){ 
+    const inp=document.getElementById('chatInput'),text=inp.value.trim(); 
+    if(!text)return; 
+    addChatMsg('user',text);inp.value=''; 
+    state.chatCount++;checkAchievements();saveState(); 
+    
+    const tid='t-'+Date.now(); 
+    setTimeout(()=>addTyping(tid),300); 
+    
+    // Wait for the AI response
+    const aiResponse = await generateResponse(text);
+    removeTyping(tid);
+    addChatMsg('ai', aiResponse, true); // true means it contains HTML
+    
+    // Speak the response (strip HTML tags so it reads properly)
+    if(voiceEnabled) speak(aiResponse.replace(/<[^>]*>?/gm, '')); 
+}
 
 function addTyping(id){ const c=document.getElementById('chatMessages'),t=document.createElement('div');t.id=id;t.className='chat-msg ai flex gap-2'; t.innerHTML=`<div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 orb-gradient"><i class="fas fa-robot text-deep text-xs"></i></div><div class="glass px-4 py-3 rounded-xl rounded-tl-none"><div class="flex gap-1"><span class="w-2 h-2 rounded-full bg-primary/60 animate-breathe"></span><span class="w-2 h-2 rounded-full bg-primary/60 animate-breathe delay-200"></span><span class="w-2 h-2 rounded-full bg-primary/60 animate-breathe delay-400"></span></div></div>`; c.appendChild(t);c.scrollTop=c.scrollHeight; }
 function removeTyping(id){const e=document.getElementById(id);if(e)e.remove()}
 
-function generateResponse(input){ const l=input.toLowerCase(); const responses={ greeting:{keys:['hey','hi','hello','sup','yo','hola'],reply:()=>`Hey ${state.name||'there'}! Great to see you. What would you like to learn about today?`}, python:{keys:['python','coding','programming','code'],reply:()=>'Python is an amazing starting point! It is readable, versatile, and powers everything from web apps to AI. I recommend starting with the CodeCraft path.'}, javascript:{keys:['javascript','js','react','node','frontend'],reply:()=>'JavaScript is the language of the web! Start with variables and functions, then move to DOM manipulation. The CodeCraft path covers this.'}, design:{keys:['design','ui','ux','figma','visual'],reply:()=>'Design is all about empathy and visual storytelling. The DesignVerse path is perfect! Pro tip: study designs you love and reverse-engineer why they work.'}, data:{keys:['data','analytics','statistics','sql'],reply:()=>'Data is the new literacy! Start with SQL and basic statistics. The DataSphere path has everything you need.'}, ai:{keys:['ai','machine learning','ml','neural','deep learning'],reply:()=>'AI is transforming everything! Start by understanding what machine learning actually does: finding patterns in data. The AI Frontiers path is your gateway.'}, business:{keys:['business','startup','entrepreneur','marketing'],reply:()=>'Every great business starts with a real problem. Fall in love with the problem. The BizLogic path covers business modeling and startup thinking.'}, life:{keys:['life skills','communication','confidence','motivation'],reply:()=>'Life skills are the foundation everything else builds on. The LifeSkills path covers communication, financial literacy, and emotional intelligence.'}, help:{keys:['help','stuck','confused','explain'],reply:()=>'No worries — that is exactly what I am here for! Tell me what is confusing you and I will break it down step by step.'}, motivation:{keys:['tired','give up','bored','hard','difficult'],reply:()=>'I hear you. Learning is a marathon, not a sprint. Even 10 minutes a day compounds into something incredible. You have got this!'}, thanks:{keys:['thank','thanks','thx','appreciate'],reply:()=>'You are very welcome! Keep being curious — it is your superpower.'}, quiz:{keys:['quiz','test','practice','exercise'],reply:()=>'Every lesson has a knowledge check quiz at the end! Open any learning path, read a lesson, and test yourself.'}, certificate:{keys:['certificate','cert','credential'],reply:()=>'Complete all lessons in any learning path and you can generate a verified certificate! It downloads as an image you can share.'}, timer:{keys:['timer','focus','pomodoro','concentrate'],reply:()=>'The Study Timer uses the Pomodoro technique: 25 minutes of focus, then a 5-minute break. Scroll to the Focus Mode section to try it!'}, graph:{keys:['graph','map','knowledge map','connections'],reply:()=>'The Neural Knowledge Map shows how every topic connects. It is interactive — drag nodes around, click to see connections. Scroll down to explore it visually!'}, bookmark:{keys:['bookmark','save','favorite'],reply:()=>'You can bookmark any lesson from within a learning path! Just click the bookmark icon next to the lesson.'}, math:{keys:['math','calculus','algebra','geometry'],reply:()=>'Math is the language of the universe! Our DataSphere path covers statistics and mathematical thinking.'}, cybersecurity:{keys:['security','cyber','hacking','privacy'],reply:()=>'Cybersecurity is critical! Start with understanding common threats, then learn about encryption and safe practices.'}, career:{keys:['career','job','interview','resume'],reply:()=>'Building a career starts with skills, then proving them. Create projects, earn certificates here on Lumina, and build a portfolio.'}, speed:{keys:['fast','quickly','speed','accelerated'],reply:()=>'Speed learning tip: focus on the 20% of concepts that give you 80% of understanding. The Study Timer helps you stay focused in short intense bursts.'}, }; for(const[,data]of Object.entries(responses)){ if(data.keys.some(k=>l.includes(k)))return data.reply(); } const defaults=['Great question! I would recommend exploring our learning paths to find topics that match your interests.','Interesting! The best way to learn is by doing. Pick a learning path that excites you, read through the lessons, and try the quizzes.','I love your curiosity! Try exploring the Knowledge Map to see how different topics connect.','That is a fantastic area to explore. The more you learn, the more connections you will see. Try starting with CodeCraft or DesignVerse!']; return defaults[Math.floor(Math.random()*defaults.length)]; }
+// ====================== REAL AI INTEGRATION ======================
+// PASTE YOUR GEMINI API KEY HERE (Keep it secret in real production apps!)
+// ====================== REAL AI INTEGRATION WITH MEMORY ======================
+const GEMINI_API_KEY = 'AQ.Ab8RN6JHYnsZIqnu22thSLqYbMaCPuUobeFy3cnKy21XQtTm0A'; 
+
+async function generateResponse(input) {
+    if (GEMINI_API_KEY === 'AQ.Ab8RN6JHYnsZIqnu22thSLqYbMaCPuUobeFy3cnKy21XQtTm0A' || !GEMINI_API_KEY) {
+        return generateLocalResponse(input);
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+
+    // Dynamic System Prompt with User Context
+    const userContext = `
+User's Name: ${state.name || 'Explorer'}
+Current Level: ${state.level}
+Total XP: ${state.xp}
+Paths Explored: ${[...state.pathsVisited].join(', ') || 'None yet'}
+Lessons Completed: ${state.lessonsRead.size}`;
+
+    const systemPrompt = `You are Lumina AI Mentor, a brilliant, encouraging, and expert educational tutor and career guide integrated into the Lumina learning platform.
+ ${userContext}
+
+YOUR SUPERPOWERS:
+1. **Personal Roadmaps:** When a user tells you what they want to become (e.g., "I want to be a data scientist"), you MUST generate a structured, step-by-step learning roadmap. Use Markdown headings, bullet points, and bold text.
+2. **Personal Mentor:** Remember their name and level. Reference their progress. Be conversational, warm, and highly encouraging.
+3. **Concise & Formatted:** Use Markdown formatting (bold, lists, code blocks) to make answers beautiful and easy to read. Do not use giant paragraphs.
+
+If asked who you are, say you are the Lumina AI Mentor, built to guide their learning universe.`;
+
+    // Build the conversation history for the API
+    const conversationHistory = [
+        { role: "user", parts: [{ text: systemPrompt }] },
+        { role: "model", parts: [{ text: "Understood. I am Lumina AI Mentor. I will act as a personal guide, remember the user's context, and generate structured roadmaps using Markdown." }] },
+        ...state.chatHistory.slice(-10), // Keep the last 10 messages for memory
+        { role: "user", parts: [{ text: input }] }
+    ];
+
+    const payload = {
+        contents: conversationHistory,
+        generationConfig: {
+            temperature: 0.8,
+            maxOutputTokens: 800,
+        }
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0].content) {
+            const aiText = data.candidates[0].content.parts[0].text;
+            
+            // Save this interaction to memory
+            state.chatHistory.push({ role: "user", parts: [{ text: input }] });
+            state.chatHistory.push({ role: "model", parts: [{ text: aiText }] });
+            saveState(); // Persist the memory!
+
+            return marked.parse(aiText); 
+        } else {
+            return "<p>I'm having trouble thinking right now. Please try again!</p>";
+        }
+    } catch (error) {
+        console.error("AI API Error:", error);
+        return "<p>Connection error. Falling back to local knowledge...</p>" + generateLocalResponse(input);
+    }
+}
+
+function generateLocalResponse(input){ 
+    const l=input.toLowerCase(); 
+    if(l.includes('roadmap') || l.includes('become') || l.includes('career')) return "I can create a personalized roadmap for you! Tell me: what is your dream role or the skill you want to master?";
+    if(l.includes('hey') || l.includes('hi') || l.includes('hello')) return `Hey ${state.name||'there'}! Great to see you. What would you like to learn about today?`; 
+    return "That's a great question! I recommend exploring our learning paths to find topics that match your interests."; 
+}
 
 function startCompanion(){ showCompanionMsg(`Hey ${state.name||'there'}! Scroll around and explore. I will be right here.`); companionInterval=setInterval(()=>{ showCompanionMsg(COMPANION_MSGS[companionIdx%COMPANION_MSGS.length]);companionIdx++; },15000); }
 function showCompanionMsg(msg){ const b=document.getElementById('companionBubble');b.textContent=msg;b.classList.add('show'); setTimeout(()=>b.classList.remove('show'),6000); }

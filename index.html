@@ -88,10 +88,17 @@
             <button id="voiceToggle" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-muted hover:text-primary transition-all" aria-label="Toggle voice" title="Toggle voice responses"><i class="fas fa-volume-mute text-sm"></i></button>
             <button id="closeChat" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-muted hover:text-white transition-all" aria-label="Close chat"><i class="fas fa-times text-sm"></i></button>
         </div>
-        <div id="chatMessages" class="p-4 space-y-3 overflow-y-auto chat-height"></div>
-        <div class="p-3 border-t border-primary/10 flex gap-2">
-            <input type="text" id="chatInput" placeholder="Ask me anything..." class="flex-1 bg-base border border-primary/10 rounded-xl px-4 py-2 text-sm text-white placeholder-muted/50 focus:outline-none focus:border-primary/40 transition-all">
-            <button id="chatSend" class="w-10 h-10 rounded-xl bg-primary/20 text-primary hover:bg-primary/30 transition-all flex items-center justify-center" aria-label="Send"><i class="fas fa-paper-plane text-sm"></i></button>
+               <div class="p-3 border-t border-primary/10">
+            <!-- Quick Action Buttons -->
+            <div class="flex gap-2 mb-2 overflow-x-auto pb-1" id="quickActions">
+                <button class="quick-action-btn whitespace-nowrap px-3 py-1 rounded-full text-xs font-display bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all">Create a Roadmap</button>
+                <button class="quick-action-btn whitespace-nowrap px-3 py-1 rounded-full text-xs font-display bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-all">What should I learn?</button>
+                <button class="quick-action-btn whitespace-nowrap px-3 py-1 rounded-full text-xs font-display bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all">Motivate me</button>
+            </div>
+            <div class="flex gap-2">
+                <input type="text" id="chatInput" placeholder="Ask me anything..." class="flex-1 bg-base border border-primary/10 rounded-xl px-4 py-2 text-sm text-white placeholder-muted/50 focus:outline-none focus:border-primary/40 transition-all">
+                <button id="chatSend" class="w-10 h-10 rounded-xl bg-primary/20 text-primary hover:bg-primary/30 transition-all flex items-center justify-center" aria-label="Send"><i class="fas fa-paper-plane text-sm"></i></button>
+            </div>
         </div>
     </div>
 
@@ -364,6 +371,10 @@
         </div>
     </footer>
 
+    <!-- Markdown Parser for AI formatting -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Your Script -->
     <script src="script.js" defer></script>
 </body>
 </html>
