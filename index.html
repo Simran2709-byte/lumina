@@ -4,6 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXUS — Your Learning Universe</title>
+    
+    <!-- Tailwind CSS (This is what was missing!) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['"Space Grotesk"', 'sans-serif'],
+                        body: ['"DM Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        deep: '#070b14',
+                        base: '#0c1222',
+                        surface: '#141e35',
+                        card: '#1a2540',
+                        primary: '#00f5d4',
+                        secondary: '#fee440',
+                        accent: '#f15bb5',
+                        muted: '#8892a8',
+                    }
+                }
+            }
+        }
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -18,7 +44,7 @@
             <div class="loader-ring"></div>
             <div class="loader-ring-inner"></div>
         </div>
-        <p class="font-display text-primary text-lg mt-6 tracking-widest uppercase">Initializing Nexus</p>
+        <p class="font-display text-primary text-lg mt-6 tracking-widest uppercase">Initializing LUMINA</p>
     </div>
 
     <!-- Celebration Overlay -->
@@ -56,7 +82,7 @@
         <div class="p-4 border-b border-primary/10 flex items-center gap-3">
             <div class="w-9 h-9 rounded-full flex items-center justify-center orb-gradient"><i class="fas fa-robot text-deep text-sm"></i></div>
             <div class="flex-1">
-                <p class="font-display font-bold text-sm">Nexus AI Mentor</p>
+                <p class="font-display font-bold text-sm">Lumina AI Mentor</p>
                 <p class="text-xs text-primary flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-primary inline-block"></span> Always online</p>
             </div>
             <button id="voiceToggle" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-muted hover:text-primary transition-all" aria-label="Toggle voice" title="Toggle voice responses"><i class="fas fa-volume-mute text-sm"></i></button>
@@ -162,7 +188,7 @@
                 <div>
                     <p class="font-display text-secondary text-xs tracking-[0.3em] uppercase mb-3 reveal-left">Your AI Companion</p>
                     <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-6 reveal-left delay-100">A Mentor That <span class="text-primary">Never Sleeps</span></h2>
-                    <p class="text-muted mb-8 leading-relaxed reveal-left delay-200">Your Nexus AI Mentor adapts to your learning speed, understands your struggles, and celebrates your wins.</p>
+                    <p class="text-muted mb-8 leading-relaxed reveal-left delay-200">Your Lumina AI Mentor adapts to your learning speed, understands your struggles, and celebrates your wins.</p>
                     <div class="space-y-4">
                         <div class="flex items-start gap-4 reveal-left delay-300">
                             <div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1"><i class="fas fa-comments text-primary text-sm"></i></div>
@@ -332,7 +358,7 @@
                 <div><h4 class="font-display font-bold text-white text-sm mb-4">Connect</h4><div class="flex gap-3 mb-4"><a href="#" class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-muted hover:text-primary hover:bg-primary/10 transition-all" aria-label="Twitter"><i class="fab fa-x-twitter text-sm"></i></a><a href="#" class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-muted hover:text-primary hover:bg-primary/10 transition-all" aria-label="GitHub"><i class="fab fa-github text-sm"></i></a><a href="#" class="w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center text-muted hover:text-primary hover:bg-primary/10 transition-all" aria-label="Discord"><i class="fab fa-discord text-sm"></i></a></div><p class="text-muted text-xs">Built with curiosity.</p></div>
             </div>
             <div class="border-t border-white/5 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p class="text-muted/50 text-xs">2025 NEXUS. Learning without limits.</p>
+                <p class="text-muted/50 text-xs">2025 LUMINA. Learning without limits.</p>
                 <div class="flex gap-6 text-xs text-muted/50"><a href="#" class="hover:text-muted transition-colors">Privacy</a><a href="#" class="hover:text-muted transition-colors">Terms</a></div>
             </div>
         </div>
