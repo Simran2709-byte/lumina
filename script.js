@@ -183,14 +183,19 @@ function removeTyping(id){const e=document.getElementById(id);if(e)e.remove()}
 // ====================== REAL AI INTEGRATION ======================
 // PASTE YOUR GEMINI API KEY HERE (Keep it secret in real production apps!)
 // ====================== REAL AI INTEGRATION WITH MEMORY ======================
-const GEMINI_API_KEY = 'AQ.Ab8RN6JHYnsZIqnu22thSLqYbMaCPuUobeFy3cnKy21XQtTm0A'; 
+// Securely gets the API key from the user's local browser storage
+function getApiKey() {
+    return localStorage.getItem('lumina_gemini_key') || '';
+} 
 
 async function generateResponse(input) {
-    if (GEMINI_API_KEY === 'AQ.Ab8RN6JHYnsZIqnu22thSLqYbMaCPuUobeFy3cnKy21XQtTm0A' || !GEMINI_API_KEY) {
-        return generateLocalResponse(input);
+    const apiKey = getApiKey();
+    if (!apiKey) {
+        return generateLocalResponse(input) + "<br><br><small class='text-muted'>(Set your Gemini API key in chat settings to unlock full AI)</small>";
     }
 
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+    
 
     // Dynamic System Prompt with User Context
     const userContext = `
@@ -268,3 +273,18 @@ document.getElementById('ctaForm').addEventListener('submit',e=>{ e.preventDefau
 function init(){ document.querySelectorAll('.reveal,.reveal-left,.reveal-right').forEach(el=>revealObs.observe(el)); document.querySelectorAll('[data-target]').forEach(el=>counterObs.observe(el)); initTilt(); if(state.xp>0){ const maxXP=500; document.getElementById('xpBar').style.setProperty('--xp-width', ((state.xp%maxXP)/maxXP*100)+'%'); document.getElementById('xpDisplay').textContent=`${state.xp%maxXP} / ${maxXP} XP`; document.getElementById('userLevel').textContent=state.level; } document.getElementById('streakCount').textContent=state.streak+' day streak'; document.getElementById('timerSessions').textContent=state.timerSessions; }
 setTimeout(init,100);
 if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices()}
+
+// API Key Settings Logic
+document.getElementById('apiKeyBtn').addEventListener('click', () => {
+    const currentKey = getApiKey();
+    const newKey = prompt("Enter your Google Gemini API Key:\n\n(Get one free at aistudio.google.com)", currentKey);
+    if (newKey !== null) {
+        if (newKey.trim() === '') {
+            localStorage.removeItem('lumina_gemini_key');
+            showToast('<i class="fas fa-key text-accent mr-2"></i>API Key removed. Using local responses.');
+        } else {
+            localStorage.setItem('lumina_gemini_key', newKey.trim());
+            showToast('<i class="fas fa-check text-primary mr-2"></i>API Key saved! AI Mentor unlocked.');
+        }
+    }
+});
